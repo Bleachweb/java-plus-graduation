@@ -15,6 +15,8 @@ import ru.practicum.event.service.EventPublicService;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static ru.practicum.event.constants.Constants.DATE_TIME_FORMAT;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/events")
@@ -29,8 +31,8 @@ public class EventPublicController {
             @RequestParam(required = false) String text,
             @RequestParam(required = false) List<Long> categories,
             @RequestParam(required = false) Boolean paid,
-            @RequestParam(required = false) @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
-            @RequestParam(required = false) @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+            @RequestParam(required = false) @JsonFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeStart,
+            @RequestParam(required = false) @JsonFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeEnd,
             @RequestParam(defaultValue = "false") Boolean onlyAvailable,
             @RequestParam(defaultValue = "EVENT_DATE") EventSort eventSort,
             @RequestParam(defaultValue = "0") Long from,

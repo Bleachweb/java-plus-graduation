@@ -2,11 +2,12 @@ package ru.practicum.event.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import ru.practicum.EventHitDto;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.mapper.EventMapper;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventPublicServiceImpl implements EventPublicService {
@@ -34,6 +36,7 @@ public class EventPublicServiceImpl implements EventPublicService {
     private final EventRepository eventRepository;
     private final RequestRepository requestRepository;
     private final ViewRepository viewRepository;
+    private final TransactionTemplate transactionTemplate;
 
     // Получение событий с возможностью фильтрации
     @Override
@@ -84,8 +87,17 @@ public class EventPublicServiceImpl implements EventPublicService {
 
     // Получение подробной информации об опубликованном событии по его идентификатору
     @Override
-    @Transactional(readOnly = false)
     public EventFullDto getEventById(Long eventId, HttpServletRequest request) {
+        EventFullDto result = transactionTemplate.execute(status ->
+                getEventData(eventId, request));
+
+        // Вызов статистики вне транзакции
+        sendStatistic(request);
+
+        return result;
+    }
+
+    public EventFullDto getEventData(Long eventId, HttpServletRequest request) {
         // событие должно быть опубликовано
         Event event = eventRepository.findByIdAndState(eventId, State.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
@@ -102,16 +114,21 @@ public class EventPublicServiceImpl implements EventPublicService {
                     .build();
             viewRepository.save(view);
         }
-
-        // информацию о том, что по этому эндпоинту был осуществлен и обработан запрос, нужно сохранить в сервисе статистики
-        statClient.hit(EventHitDto.builder()
-                .ip(request.getRemoteAddr())
-                .uri(request.getRequestURI())
-                .app("ewm-main-service")
-                .timestamp(LocalDateTime.now())
-                .build());
-
         return EventMapper.toEventFullDto(event, confirmedRequests, views);
+    }
+
+    private void sendStatistic(HttpServletRequest request) {
+        // информацию о том, что по этому эндпоинту был осуществлен и обработан запрос, нужно сохранить в сервисе статистики
+        try {
+            statClient.hit(EventHitDto.builder()
+                    .ip(request.getRemoteAddr())
+                    .uri(request.getRequestURI())
+                    .app("ewm-main-service")
+                    .timestamp(LocalDateTime.now())
+                    .build());
+        } catch (Exception e) {
+            log.warn("Failed to send statistics for URI: {}", request.getRequestURI(), e);
+        }
     }
 
 }
