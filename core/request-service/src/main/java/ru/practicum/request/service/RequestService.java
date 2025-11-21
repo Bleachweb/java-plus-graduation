@@ -41,27 +41,32 @@ public class RequestService {
 
         return transactionTemplate.execute(status -> {
             // нельзя добавить повторный запрос (Ожидается код ошибки 409)
-            if (requestRepository.existsByRequesterIdAndEventId(userId, eventId))
+            if (requestRepository.existsByRequesterIdAndEventId(userId, eventId)) {
                 throw new ConflictException("User tries to make duplicate request", "Forbidden action");
+            }
 
             // инициатор события не может добавить запрос на участие в своём событии (Ожидается код ошибки 409)
-            if (Objects.equals(userId, eventDto.getInitiatorId()))
+            if (Objects.equals(userId, eventDto.getInitiatorId())) {
                 throw new ConflictException("User tries to request for his own event", "Forbidden action");
+            }
 
             // нельзя участвовать в неопубликованном событии (Ожидается код ошибки 409)
-            if (eventDto.getState() != State.PUBLISHED)
+            if (eventDto.getState() != State.PUBLISHED) {
                 throw new ConflictException("User tries to request for non-published event", "Forbidden action");
-
+            }
             // если у события достигнут лимит запросов на участие - необходимо вернуть ошибку (Ожидается код ошибки 409)
             long confirmedRequestCount = requestRepository.countByEventIdAndStatus(eventId, ParticipationRequestStatus.CONFIRMED);
-            if (eventDto.getParticipantLimit() > 0 && confirmedRequestCount >= eventDto.getParticipantLimit())
+            if (eventDto.getParticipantLimit() > 0 && confirmedRequestCount >= eventDto.getParticipantLimit()) {
                 throw new ConflictException("Participants limit is already reached", "Forbidden action");
-
+            }
             // если для события отключена пре-модерация запросов на участие, то запрос должен автоматически перейти в состояние подтвержденного
             ParticipationRequestStatus newRequestStatus = ParticipationRequestStatus.PENDING;
-            if (!eventDto.getRequestModeration()) newRequestStatus = ParticipationRequestStatus.CONFIRMED;
-            if (Objects.equals(eventDto.getParticipantLimit(), 0L))
+            if (!eventDto.getRequestModeration()) {
                 newRequestStatus = ParticipationRequestStatus.CONFIRMED;
+            }
+            if (Objects.equals(eventDto.getParticipantLimit(), 0L)) {
+                newRequestStatus = ParticipationRequestStatus.CONFIRMED;
+            }
 
             Request newRequest = Request.builder()
                     .requesterId(userId)
@@ -80,8 +85,9 @@ public class RequestService {
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Not found Request " + requestId));
 
-        if (!Objects.equals(request.getRequesterId(), userId))
+        if (!Objects.equals(request.getRequesterId(), userId)) {
             throw new ConflictException("User can cancel only his own event", "Forbidden action");
+        }
 
         request.setStatus(ParticipationRequestStatus.CANCELED);
         requestRepository.save(request);
@@ -103,9 +109,9 @@ public class RequestService {
         EventInteractionDto eventDto = eventClientHelper.retrieveEventInteractionDtoByEventIdOrFall(eventId);
 
         // проверка что юзер - инициатор события
-        if (!Objects.equals(userId, eventDto.getInitiatorId()))
+        if (!Objects.equals(userId, eventDto.getInitiatorId())) {
             throw new ConflictException("User " + userId + " is not an initiator of event " + eventId, "Forbidden action");
-
+        }
         return requestRepository.findByEventId(eventId).stream()
                 .map(RequestMapper::toDto)
                 .toList();
@@ -120,19 +126,20 @@ public class RequestService {
         EventInteractionDto eventDto = eventClientHelper.retrieveEventInteractionDtoByEventIdOrFall(eventId);
 
         // проверка что юзер - инициатор события
-        if (!Objects.equals(userId, eventDto.getInitiatorId()))
+        if (!Objects.equals(userId, eventDto.getInitiatorId())) {
             throw new ConflictException("User " + userId + " is not an initiator of event " + eventId, "Forbidden action");
-
+        }
         // если для события лимит заявок равен 0 или отключена пре-модерация заявок, то подтверждение заявок не требуется
-        if (eventDto.getParticipantLimit() < 1 || !eventDto.getRequestModeration())
+        if (eventDto.getParticipantLimit() < 1 || !eventDto.getRequestModeration()) {
             return new EventRequestStatusUpdateResultDto();
-
+        }
         return transactionTemplate.execute(status -> {
             // статус можно изменить только у заявок, находящихся в состоянии ожидания (Ожидается код ошибки 409)
             List<Request> requests = requestRepository.findAllById(updateRequestDto.getRequestIds());
             for (Request request : requests) {
-                if (!Objects.equals(request.getStatus(), ParticipationRequestStatus.PENDING))
+                if (!Objects.equals(request.getStatus(), ParticipationRequestStatus.PENDING)) {
                     throw new ConflictException("Request " + request.getId() + " must have status PENDING", "Incorrectly made request");
+                }
             }
 
             List<Long> requestsToConfirm = new ArrayList<>();

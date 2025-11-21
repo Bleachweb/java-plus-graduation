@@ -39,8 +39,9 @@ public class EventPublicServiceImpl implements EventPublicService {
     // Получение событий с возможностью фильтрации
     @Override
     public List<EventShortDto> getAllEventsByParams(EventParams params, HttpServletRequest request) {
-        if (params.getRangeStart() != null && params.getRangeEnd() != null && params.getRangeEnd().isBefore(params.getRangeStart()))
+        if (params.getRangeStart() != null && params.getRangeEnd() != null && params.getRangeEnd().isBefore(params.getRangeStart())) {
             throw new BadRequestException("rangeStart should be before rangeEnd");
+        }
 
         // если в запросе не указан диапазон дат, то нужно выгружать события, которые произойдут позже текущего времени
         if (params.getRangeStart() == null) {

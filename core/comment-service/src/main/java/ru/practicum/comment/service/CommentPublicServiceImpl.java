@@ -42,8 +42,9 @@ public class CommentPublicServiceImpl implements CommentPublicService {
                     .orElseThrow(() -> new NotFoundException("Not found Comment " + comId));
         });
 
-        if (!Objects.equals(comment.getApproved(), true))
+        if (!Objects.equals(comment.getApproved(), true)) {
             throw new ForbiddenException("Comment " + comId + "is not approved");
+        }
 
         UserDto userDto = userClientHelper.retrieveUserDtoByUserId(comment.getAuthorId());
         EventCommentDto eventCommentDto = eventClientHelper.retrieveEventCommentDtoByEventId(comment.getEventId());
@@ -76,11 +77,13 @@ public class CommentPublicServiceImpl implements CommentPublicService {
                     .orElseThrow(() -> new NotFoundException("Not found Comment " + comId));
         });
 
-        if (!Objects.equals(comment.getEventId(), eventId))
+        if (!Objects.equals(comment.getEventId(), eventId)) {
             throw new NotFoundException("Comment " + comId + " does not belong to Event " + eventId);
+        }
 
-        if (!Objects.equals(comment.getApproved(), true))
+        if (!Objects.equals(comment.getApproved(), true)) {
             throw new ForbiddenException("Comment " + comId + "is not approved");
+        }
 
         UserDto userDto = userClientHelper.retrieveUserDtoByUserId(comment.getAuthorId());
         EventCommentDto eventCommentDto = eventClientHelper.retrieveEventCommentDtoByEventId(comment.getEventId());

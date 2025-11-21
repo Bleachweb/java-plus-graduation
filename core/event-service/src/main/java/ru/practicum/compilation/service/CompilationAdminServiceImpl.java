@@ -65,7 +65,9 @@ public class CompilationAdminServiceImpl implements CompilationAdminService {
     @Override
     @Transactional
     public String deleteCompilation(Long compId) {
-        if (!compilationRepository.existsById(compId)) throw new NotFoundException("Not found Compilation " + compId);
+        if (!compilationRepository.existsById(compId)) {
+            throw new NotFoundException("Not found Compilation " + compId);
+        }
         compilationRepository.deleteById(compId);
         return "Compilation deleted: " + compId;
     }

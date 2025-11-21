@@ -92,17 +92,30 @@ public class EventAdminServiceImpl implements EventAdminService {
                 event.setCategory(category);
             }
 
-            if (updateEventDto.getTitle() != null) event.setTitle(updateEventDto.getTitle());
-            if (updateEventDto.getAnnotation() != null) event.setAnnotation(updateEventDto.getAnnotation());
-            if (updateEventDto.getDescription() != null) event.setDescription(updateEventDto.getDescription());
-            if (updateEventDto.getLocation() != null)
+            if (updateEventDto.getTitle() != null) {
+                event.setTitle(updateEventDto.getTitle());
+            }
+            if (updateEventDto.getAnnotation() != null) {
+                event.setAnnotation(updateEventDto.getAnnotation());
+            }
+            if (updateEventDto.getDescription() != null) {
+                event.setDescription(updateEventDto.getDescription());
+            }
+            if (updateEventDto.getLocation() != null) {
                 event.setLocation(LocationMapper.toEntity(updateEventDto.getLocation()));
-            if (updateEventDto.getPaid() != null) event.setPaid(updateEventDto.getPaid());
-            if (updateEventDto.getParticipantLimit() != null)
+            }
+            if (updateEventDto.getPaid() != null) {
+                event.setPaid(updateEventDto.getPaid());
+            }
+            if (updateEventDto.getParticipantLimit() != null) {
                 event.setParticipantLimit(updateEventDto.getParticipantLimit());
-            if (updateEventDto.getRequestModeration() != null)
+            }
+            if (updateEventDto.getRequestModeration() != null) {
                 event.setRequestModeration(updateEventDto.getRequestModeration());
-            if (updateEventDto.getEventDate() != null) event.setEventDate(updateEventDto.getEventDate());
+            }
+            if (updateEventDto.getEventDate() != null) {
+                event.setEventDate(updateEventDto.getEventDate());
+            }
 
             if (Objects.equals(updateEventDto.getStateAction(), StateAction.REJECT_EVENT)) {
                 // событие можно отклонить, только если оно еще не опубликовано (Ожидается код ошибки 409)

@@ -59,9 +59,9 @@ public class EventPrivateServiceImpl implements EventPrivateService {
                     .orElseThrow(() -> new NotFoundException("Not found Event " + eventId));
         });
 
-        if (!Objects.equals(userId, event.getInitiatorId()))
+        if (!Objects.equals(userId, event.getInitiatorId())) {
             throw new ConflictException("User " + userId + " is not an initiator of event " + eventId, "Forbidden action");
-
+        }
         Long views = transactionTemplate.execute(status -> {
             return viewRepository.countByEventId(eventId);
         });
@@ -115,17 +115,19 @@ public class EventPrivateServiceImpl implements EventPrivateService {
             Event event = eventRepository.findById(eventId)
                     .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
 
-            if (!Objects.equals(userId, event.getInitiatorId()))
+            if (!Objects.equals(userId, event.getInitiatorId())) {
                 throw new ConflictException("User " + userId + " is not an initiator of event " + eventId, "Forbidden action");
-
+            }
             // изменить можно только отмененные события или события в состоянии ожидания модерации (Ожидается код ошибки 409)
-            if (event.getState() != State.PENDING && event.getState() != State.CANCELED)
+            if (event.getState() != State.PENDING && event.getState() != State.CANCELED) {
                 throw new ConflictException("Only pending or canceled events can be changed");
+            }
 
             // дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента (Ожидается код ошибки 409)
             if (updateEventDto.getEventDate() != null &&
-                    updateEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2)))
+                    updateEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
                 throw new ConflictException("Event date must be at least 2 hours from now");
+            }
 
             // если все хорошо, изменяем обновленные данные:
             if (updateEventDto.getCategory() != null) {
@@ -133,17 +135,30 @@ public class EventPrivateServiceImpl implements EventPrivateService {
                         .orElseThrow(() -> new NotFoundException("Category with id=" + updateEventDto.getCategory() + " not found"));
                 event.setCategory(category);
             }
-            if (updateEventDto.getTitle() != null) event.setTitle(updateEventDto.getTitle());
-            if (updateEventDto.getAnnotation() != null) event.setAnnotation(updateEventDto.getAnnotation());
-            if (updateEventDto.getDescription() != null) event.setDescription(updateEventDto.getDescription());
-            if (updateEventDto.getLocation() != null)
+            if (updateEventDto.getTitle() != null) {
+                event.setTitle(updateEventDto.getTitle());
+            }
+            if (updateEventDto.getAnnotation() != null) {
+                event.setAnnotation(updateEventDto.getAnnotation());
+            }
+            if (updateEventDto.getDescription() != null) {
+                event.setDescription(updateEventDto.getDescription());
+            }
+            if (updateEventDto.getLocation() != null) {
                 event.setLocation(LocationMapper.toEntity(updateEventDto.getLocation()));
-            if (updateEventDto.getPaid() != null) event.setPaid(updateEventDto.getPaid());
-            if (updateEventDto.getParticipantLimit() != null)
+            }
+            if (updateEventDto.getPaid() != null) {
+                event.setPaid(updateEventDto.getPaid());
+            }
+            if (updateEventDto.getParticipantLimit() != null) {
                 event.setParticipantLimit(updateEventDto.getParticipantLimit());
-            if (updateEventDto.getRequestModeration() != null)
+            }
+            if (updateEventDto.getRequestModeration() != null) {
                 event.setRequestModeration(updateEventDto.getRequestModeration());
-            if (updateEventDto.getEventDate() != null) event.setEventDate(updateEventDto.getEventDate());
+            }
+            if (updateEventDto.getEventDate() != null) {
+                event.setEventDate(updateEventDto.getEventDate());
+            }
             if (Objects.equals(updateEventDto.getStateAction(), StateAction.CANCEL_REVIEW)) {
                 event.setState(State.CANCELED);
             } else if (Objects.equals(updateEventDto.getStateAction(), StateAction.SEND_TO_REVIEW)) {

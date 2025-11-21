@@ -36,8 +36,9 @@ public class CommentPrivateServiceImpl implements CommentPrivateService {
         UserDto userDto = userClientHelper.retrieveUserDtoByUserIdOrFall(userId);
         EventCommentDto eventCommentDto = eventClientHelper.retrieveEventCommentDtoByEventIdOrFall(eventId);
 
-        if (!Objects.equals(eventCommentDto.getState(), State.PUBLISHED))
+        if (!Objects.equals(eventCommentDto.getState(), State.PUBLISHED)) {
             throw new ConflictException("Unable to comment unpublished Event " + eventId);
+        }
 
         return transactionTemplate.execute(status -> {
             Comment comment = Comment.builder()
@@ -57,8 +58,9 @@ public class CommentPrivateServiceImpl implements CommentPrivateService {
     public String deleteComment(Long userId, Long comId) {
         Comment comment = commentRepository.findById(comId)
                 .orElseThrow(() -> new NotFoundException("Not found Comment " + comId));
-        if (!Objects.equals(comment.getAuthorId(), userId))
+        if (!Objects.equals(comment.getAuthorId(), userId)) {
             throw new ConflictException("Unauthorized access by user " + userId + " to comment " + comId);
+        }
         commentRepository.deleteById(comId);
         return "Deleted Comment " + comId;
     }
@@ -69,8 +71,9 @@ public class CommentPrivateServiceImpl implements CommentPrivateService {
             Comment commentEntity = commentRepository.findById(comId)
                     .orElseThrow(() -> new NotFoundException("Not found Comment " + comId));
 
-            if (!Objects.equals(commentEntity.getAuthorId(), userId))
+            if (!Objects.equals(commentEntity.getAuthorId(), userId)) {
                 throw new ConflictException("Unauthorized access by user " + userId + " to comment " + comId);
+            }
 
             commentEntity.setText(commentCreateDto.getText());
             commentEntity.setPatchTime(LocalDateTime.now());
