@@ -30,10 +30,11 @@ public abstract class RequestClientAbstractHelper {
 
     public boolean passedParticipationCheck(Long userId, Long eventId) {
         try {
-            requestApiClient.checkParticipation(userId, eventId);
-            return true;
+            return requestApiClient.checkParticipation(userId, eventId);
         } catch (RuntimeException e) {
-            if (isNotFoundCode(e)) return false;
+            if (isNotFoundCode(e)) {
+                return false;
+            }
             log.warn("Service Interaction Error: caught " + e.getClass().getSimpleName() + " - " + e.getMessage());
             throw new ServiceInteractionException("Unable to confirm participation of user " + userId + " in event " + eventId);
         }

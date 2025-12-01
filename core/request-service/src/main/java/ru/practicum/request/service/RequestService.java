@@ -205,11 +205,10 @@ public class RequestService {
     }
 
     @Transactional(readOnly = true)
-    public String checkParticipation(Long userId, Long eventId) {
-        if (requestRepository.existsByRequesterIdAndEventIdAndStatus(userId, eventId, ParticipationRequestStatus.CONFIRMED)) {
-            return "true";
-        }
-        throw new NotFoundException("Not found CONFIRMED request for user " + userId + " and event " + eventId);
+    public boolean checkParticipation(Long userId, Long eventId) {
+        return requestRepository.existsByRequesterIdAndEventIdAndStatus(
+                userId, eventId, ParticipationRequestStatus.CONFIRMED
+        );
     }
 
 }
