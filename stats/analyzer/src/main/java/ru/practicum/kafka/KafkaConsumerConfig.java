@@ -33,8 +33,10 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, customProperties.getKafka().getAutoOffsetReset());
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, customProperties.getKafka().getEnableAutoCommit());
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, customProperties.getKafka().getMaxPollRecords());
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
 
-        // Добавляем дополнительные настройки только если они не null
+        // Дополнительные настройки - все Integer
         if (customProperties.getKafka().getMaxPollIntervalMs() != null) {
             props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, customProperties.getKafka().getMaxPollIntervalMs());
         }
@@ -50,9 +52,6 @@ public class KafkaConsumerConfig {
         if (customProperties.getKafka().getFetchMaxWaitMs() != null) {
             props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, customProperties.getKafka().getFetchMaxWaitMs());
         }
-
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
 
         return props;
     }
@@ -82,7 +81,6 @@ public class KafkaConsumerConfig {
         factory.setAutoStartup(false);
         factory.setBatchListener(false);
 
-        // Устанавливаем concurrency только если оно задано
         if (customProperties.getKafka().getConcurrency() != null) {
             factory.setConcurrency(customProperties.getKafka().getConcurrency());
         }
