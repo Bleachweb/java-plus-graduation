@@ -16,8 +16,7 @@ import ru.practicum.service.UserActionService;
 @RequiredArgsConstructor
 public class KafkaController {
 
-    private final KafkaListenerEndpointRegistry kafkaRegistry;
-
+    private final KafkaListenerEndpointRegistry kafkaRegistry; // Spring Boot создаст этот бин
     private final CustomProperties customProperties;
     private final UserActionService userActionService;
     private final EventSimilarityService eventSimilarityService;
@@ -42,5 +41,4 @@ public class KafkaController {
     public void listenEventSimilarity(EventSimilarityAvro eventSimilarityAvro) {
         eventSimilarityService.handleEventSimilarity(eventSimilarityAvro);
     }
-
 }
