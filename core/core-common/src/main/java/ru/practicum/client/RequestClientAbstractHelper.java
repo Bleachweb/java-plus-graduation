@@ -30,21 +30,21 @@ public abstract class RequestClientAbstractHelper {
 
     public boolean passedParticipationCheck(Long userId, Long eventId) {
         try {
-            return requestApiClient.checkParticipation(userId, eventId);
-        } catch (FeignException.NotFound e) {
-            return false;
+            requestApiClient.checkParticipation(userId, eventId);
+            return true;
         } catch (RuntimeException e) {
-            for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause()) {
-                if (cause instanceof FeignException.NotFound) {
-                    return false;
-                }
-            }
-            log.warn("Service Interaction Error: caught {} - {}",
-                    e.getClass().getSimpleName(), e.getMessage());
-            throw new ServiceInteractionException(
-                    "Unable to confirm participation of user " + userId + " in event " + eventId
-            );
+            if (isNotFoundCode(e)) return false;
+            log.warn("Service Interaction Error: caught " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            throw new ServiceInteractionException("Unable to confirm participation of user " + userId + " in event " + eventId);
         }
+    }
+
+    // PRIVATE METHODS
+
+    private boolean isNotFoundCode(RuntimeException e) {
+        if (e instanceof FeignException.NotFound) return true;
+        if (e.getCause() != null && e.getCause() instanceof FeignException.NotFound) return true;
+        return false;
     }
 
 }
