@@ -3,6 +3,7 @@ package ru.practicum.kafka;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.VoidDeserializer;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
+@EnableConfigurationProperties(CustomProperties.class)
 @RequiredArgsConstructor
 public class KafkaConsumerConfig {
 
@@ -27,10 +29,14 @@ public class KafkaConsumerConfig {
     private Map<String, Object> getNewCommonConsumerProperties() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, VoidDeserializer.class);
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, customProperties.getKafka().getBootstrapServers());
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, customProperties.getKafka().getAutoOffsetReset());
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, customProperties.getKafka().getEnableAutoCommit());
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, customProperties.getKafka().getMaxPollRecords());
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                customProperties.getKafka().getBootstrapServers());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
+                customProperties.getKafka().getAutoOffsetReset());
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
+                customProperties.getKafka().getEnableAutoCommit());
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,
+                customProperties.getKafka().getMaxPollRecords());
         return props;
     }
 
@@ -38,7 +44,8 @@ public class KafkaConsumerConfig {
     public ConsumerFactory<String, UserActionAvro> userActionConsumerFactory() {
         Map<String, Object> props = getNewCommonConsumerProperties();
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, UserActionAvroDeserializer.class);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, customProperties.getKafka().getUserActionConsumerGroup());
+        props.put(ConsumerConfig.GROUP_ID_CONFIG,
+                customProperties.getKafka().getConsumerGroups().getUserAction());
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
@@ -46,7 +53,8 @@ public class KafkaConsumerConfig {
     public ConsumerFactory<String, EventSimilarityAvro> eventsSimilarityConsumerFactory() {
         Map<String, Object> props = getNewCommonConsumerProperties();
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, EventsSimilarityAvroDeserializer.class);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, customProperties.getKafka().getEventsSimilarityConsumerGroup());
+        props.put(ConsumerConfig.GROUP_ID_CONFIG,
+                customProperties.getKafka().getConsumerGroups().getEventsSimilarity());
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
@@ -57,6 +65,7 @@ public class KafkaConsumerConfig {
         factory.setAutoStartup(false);
         factory.setBatchListener(false);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
+
         return factory;
     }
 
@@ -67,7 +76,7 @@ public class KafkaConsumerConfig {
         factory.setAutoStartup(false);
         factory.setBatchListener(false);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
+
         return factory;
     }
-
 }

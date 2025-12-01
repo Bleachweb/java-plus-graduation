@@ -14,42 +14,54 @@ import java.math.BigDecimal;
 @Component
 public class CustomProperties {
 
-    private final Kafka kafka = new Kafka();
-    private final Analyzer analyzer = new Analyzer();
+    private KafkaProperties kafka = new KafkaProperties();
+    private AnalyzerProperties analyzer = new AnalyzerProperties();
 
     @Getter
     @Setter
-    public static class Kafka {
-        private String userActionTopic = "user-actions";
-        private String eventsSimilarityTopic = "events-similarity";
-        private String userActionConsumerGroup = "analyzer-user-action-group";
-        private String eventsSimilarityConsumerGroup = "analyzer-events-similarity-group";
+    public static class KafkaProperties {
         private String bootstrapServers = "localhost:9092";
         private String autoOffsetReset = "latest";
-        private String enableAutoCommit = "false";
-        private String maxPollRecords = "500";
-    }
+        private Boolean enableAutoCommit = false;
+        private Integer maxPollRecords = 500;
 
-    @Getter
-    @Setter
-    public static class Analyzer {
-        private final Weights weights = new Weights();
-    }
+        private TopicsProperties topics = new TopicsProperties();
+        private ConsumerGroupsProperties consumerGroups = new ConsumerGroupsProperties();
 
-    @Getter
-    @Setter
-    public static class Weights {
-        private String like = "0.9";
-        private String register = "0.7";
-        private String view = "0.3";
+        @Getter
+        @Setter
+        public static class TopicsProperties {
+            private String userAction = "user-actions";
+            private String eventsSimilarity = "events-similarity";
+        }
 
-        public BigDecimal ofUserAction(UserActionAvro userActionAvro) {
-            return switch (userActionAvro.getActionType()) {
-                case LIKE -> new BigDecimal(like);
-                case REGISTER -> new BigDecimal(register);
-                default -> new BigDecimal(view);
-            };
+        @Getter
+        @Setter
+        public static class ConsumerGroupsProperties {
+            private String userAction = "analyzer-user-action-group";
+            private String eventsSimilarity = "analyzer-events-similarity-group";
         }
     }
 
+    @Getter
+    @Setter
+    public static class AnalyzerProperties {
+        private WeightsProperties weights = new WeightsProperties();
+
+        @Getter
+        @Setter
+        public static class WeightsProperties {
+            private BigDecimal like = new BigDecimal("0.9");
+            private BigDecimal register = new BigDecimal("0.7");
+            private BigDecimal view = new BigDecimal("0.3");
+
+            public BigDecimal ofUserAction(UserActionAvro userActionAvro) {
+                return switch (userActionAvro.getActionType()) {
+                    case LIKE -> like;
+                    case REGISTER -> register;
+                    default -> view;
+                };
+            }
+        }
+    }
 }

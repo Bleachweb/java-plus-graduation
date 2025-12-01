@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static ru.practicum.constants.Constants.DATE_TIME_FORMAT;
+import static ru.practicum.constants.Constants.X_EWM_USER_ID;
 
 public interface EventPublicApi {
 
@@ -35,7 +36,7 @@ public interface EventPublicApi {
     @GetMapping("/events/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     EventFullDto getInformationAboutEventByEventId(
-            @RequestHeader("X-EWM-USER-ID") @Positive Long userId,
+            @RequestHeader(X_EWM_USER_ID) @Positive Long userId,
             @PathVariable @Positive Long eventId,
             HttpServletRequest request
     );
@@ -65,14 +66,14 @@ public interface EventPublicApi {
     @GetMapping("/events/recommendations")
     @ResponseStatus(HttpStatus.OK)
     Collection<EventShortDto> getRecommendations(
-            @RequestHeader("X-EWM-USER-ID") @Positive Long userId,
+            @RequestHeader(X_EWM_USER_ID) @Positive Long userId,
             @RequestParam(defaultValue = "10") Integer size
     );
 
     @PutMapping("/events/{eventId}/like")
     @ResponseStatus(HttpStatus.OK)
     String sendLike(
-            @RequestHeader("X-EWM-USER-ID") @Positive Long userId,
+            @RequestHeader(X_EWM_USER_ID) @Positive Long userId,
             @PathVariable @Positive Long eventId
     );
 

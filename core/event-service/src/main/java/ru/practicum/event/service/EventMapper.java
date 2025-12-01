@@ -37,10 +37,9 @@ public class EventMapper {
             Event event,
             UserShortDto userShortDto,
             Long confirmedRequests,
-            Double rating
+            double rating
     ) {
         if (confirmedRequests == null) confirmedRequests = 0L;
-        if (rating == null) rating = 0.0;
         return EventFullDto.builder()
                 .id(event.getId())
                 .initiator(userShortDto)

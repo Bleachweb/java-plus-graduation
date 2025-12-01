@@ -95,7 +95,7 @@ public class EventPublicServiceImpl implements EventPublicService {
         Event event = transactionTemplate.execute(status -> {
             // событие должно быть опубликовано
             return eventRepository.findByIdAndState(eventId, State.PUBLISHED)
-                    .orElseThrow(() -> new NotFoundException("Event not found"));
+                    .orElseThrow(() -> new NotFoundException("Event not found" + eventId));
         });
 
         UserShortDto userShortDto = userClientHelper.retrieveUserShortDtoByUserId(event.getInitiatorId());
@@ -138,12 +138,16 @@ public class EventPublicServiceImpl implements EventPublicService {
     @Override
     public Collection<EventShortDto> getRecommendations(Long userId, Integer size) {
         Map<Long, Double> recommendationMap = statClient.getUserRecommendations(userId, size);
-        if (recommendationMap.isEmpty()) return List.of();
+        if (recommendationMap.isEmpty()) {
+            return List.of();
+        }
 
         List<Event> events = transactionTemplate.execute(status -> {
             return eventRepository.findAllById(recommendationMap.keySet());
         });
-        if (events == null || events.isEmpty()) return List.of();
+        if (events == null || events.isEmpty()) {
+            return List.of();
+        }
 
         Set<Long> userIds = events.stream().map(Event::getInitiatorId).collect(Collectors.toSet());
         Map<Long, UserShortDto> userMap = userClientHelper.retrieveUserShortDtoMapByUserIdList(userIds);

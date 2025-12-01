@@ -14,12 +14,44 @@ spring:
         max-interval: 10000
         max-attempts: 100
 
+  # Kafka Configuration (используем для общих настроек)
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      auto-offset-reset: ${KAFKA_CONSUMER_AUTO_OFFSET_RESET:latest}
+      enable-auto-commit: ${KAFKA_CONSUMER_ENABLE_AUTO_COMMIT:false}
+      max-poll-records: ${KAFKA_CONSUMER_MAX_POLL_RECORDS:500}
+      key-deserializer: org.apache.kafka.common.serialization.VoidDeserializer
+      # value-deserializer не указываем, используем кастомные
+
+# Кастомная конфигурация приложения
+my-area-guide:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    auto-offset-reset: ${KAFKA_CONSUMER_AUTO_OFFSET_RESET:latest}
+    enable-auto-commit: ${KAFKA_CONSUMER_ENABLE_AUTO_COMMIT:false}
+    max-poll-records: ${KAFKA_CONSUMER_MAX_POLL_RECORDS:500}
+
+    topics:
+      user-action: user-actions
+      events-similarity: events-similarity
+
+    consumer-groups:
+      user-action: analyzer-user-action-group
+      events-similarity: analyzer-events-similarity-group
+
+  analyzer:
+    weights:
+      like: 0.9
+      register: 0.7
+      view: 0.3
+
 eureka:
   client:
     registerWithEureka: true
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
   instance:
     instance-id: ${spring.application.name}${random.int}
     preferIpAddress: false
-    hostname: localhost
+    hostname: ${HOSTNAME:localhost}

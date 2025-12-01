@@ -60,7 +60,7 @@ public class RequestController implements RequestApi {
     }
 
     @Override
-    public String checkParticipation(Long userId, Long eventId) {
+    public boolean checkParticipation(Long userId, Long eventId) {
         return requestService.checkParticipation(userId, eventId);
     }
 
