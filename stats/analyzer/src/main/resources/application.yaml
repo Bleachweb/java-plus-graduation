@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: analyzer
+  config:
+    import: "configserver:"
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        serviceId: config-server
+      fail-fast: true
+      retry:
+        useRandomPolicy: true
+        max-interval: 10000
+        max-attempts: 100
+
+eureka:
+  client:
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    instance-id: ${spring.application.name}${random.int}
+    preferIpAddress: false
+    hostname: localhost
+
+# Kafka Configuration
+my-area-guide:
+  kafka:
+    user-action-topic: "user-actions"
+    events-similarity-topic: "events-similarity"
+    user-action-consumer-group: "analyzer-user-action-group"
+    events-similarity-consumer-group: "analyzer-events-similarity-group"
+    bootstrap-servers: "localhost:9092"
+    auto-offset-reset: "latest"
+    enable-auto-commit: "false"
+    max-poll-records: "500"
+    concurrency: 3
+    max-poll-interval-ms: 300000
+    session-timeout-ms: 10000
+    heartbeat-interval-ms: 3000
+    max-partition-fetch-bytes: 1048576
+    fetch-max-wait-ms: 500
+
+  analyzer:
+    weights:
+      like: "0.9"
+      register: "0.7"
+      view: "0.3"

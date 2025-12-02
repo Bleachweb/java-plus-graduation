@@ -59,4 +59,8 @@ public class RequestController implements RequestApi {
         return requestService.getConfirmedRequestsByEventIds(eventIds);
     }
 
+    @Override
+    public boolean checkParticipation(Long userId, Long eventId) {
+        return requestService.checkParticipation(userId, eventId);
+    }
 }
